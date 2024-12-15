@@ -1,0 +1,10 @@
+client
+api
+mysql
+mysql-dump
+.idea
+dockerfiles/nginx/default.conf
+dockerfiles/error-reporting.ini
+dockerfiles/xdebug.ini
+.init.sql
+.gitignore

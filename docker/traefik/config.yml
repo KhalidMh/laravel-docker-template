@@ -1,0 +1,18 @@
+proxy:
+  image: traefik:latest
+  container_name: traefik
+  ports:
+    - "80:80"
+    - "8080:8080"
+  volumes:
+    - "/var/run/docker.sock:/var/run/docker.sock"
+  networks:
+    - app-shared
+  restart: unless-stopped
+  command:
+    - --api.insecure=true
+    - --providers.docker
+    - --providers.docker.exposedbydefault=false
+    # - --log.filePath=/var/log/traefik.log
+    # - --log.format=json
+    # - --log.level=DEBUG

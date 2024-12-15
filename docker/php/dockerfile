@@ -1,0 +1,42 @@
+FROM php:8.0-fpm-alpine
+
+ARG UID
+ARG GID
+
+ENV UID=${UID}
+ENV GID=${GID}
+
+# create the work directory
+RUN mkdir -p /var/www/html
+
+# set the work directory
+WORKDIR /var/www/html
+
+# add composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+# add a non-root user
+RUN addgroup -g ${GID} --system laravel
+RUN adduser -G laravel --system -D -s /bin/sh -u ${UID} laravel
+
+# change www-data to created user
+RUN sed -i "s/user = www-data/user = laravel/g" /usr/local/etc/php-fpm.d/www.conf
+RUN sed -i "s/group = www-data/group = laravel/g" /usr/local/etc/php-fpm.d/www.conf
+RUN echo "php_admin_flag[log_errors] = on" >> /usr/local/etc/php-fpm.d/www.conf
+
+# install the required extensions
+RUN apk add --no-cache mysql-client libzip-dev libpng-dev freetype-dev libxml2-dev
+RUN docker-php-ext-install zip gd pdo pdo_mysql soap opcache
+
+# add and config xdebug extension
+# RUN apk add --no-cache $PHPIZE_DEPS \
+#     && pecl install xdebug-3.1.6 \
+#     && docker-php-ext-enable xdebug
+
+# add redis extension
+# RUN mkdir -p /usr/src/php/ext/redis \
+#     && curl -L https://github.com/phpredis/phpredis/archive/5.3.4.tar.gz | tar xvz -C /usr/src/php/ext/redis --strip 1 \
+#     && echo 'redis' >> /usr/src/php-available-exts \
+#     && docker-php-ext-install redis
+   
+USER laravel
